@@ -38,7 +38,9 @@ edit the 3 definitions to your liking:
 #define generator 263
 ```
 `INT_SIZE` = the size of your integers in bits
+
 `SHIFT_REG_LEN` = the size of your shift register (which is the size of your CRC + 1)
+
 `generator` = the generator polynomial (expressed as an integer in c, so decimal or hex)
 
 finally, change your message in the main function 
