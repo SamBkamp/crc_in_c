@@ -68,6 +68,7 @@ int main(int argc, char* argv[]){
   t[0] = 0x41;
   t[1] = 0x41;
   t[2] = 0;
+  t[3] = 0; //MAKE SURE YOU HAVE AS MANY NULL TERMINATORS AS YOU HAVE BYTES IN THE CRC
 
   printf("generator:");
   printCharAsBinary(generator, CRC_LEN+1);
@@ -75,8 +76,6 @@ int main(int argc, char* argv[]){
   pr(t, sizeof(t) - 1); //WARNING YOU SHOULD NOT SUBTRACT FROM A SIZE_T UNLESS U WANT SOMETHING TO BREAK LATER
   int* crc = generateCRC(t);
   printCharAsBinary(*crc - (1 << 8), BITS_PER_BYTE);
-
-  int test = 141;
 
   *crc &= UINT_MAX >> (UINT_MAX - (CRC_LEN-1)); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
   
