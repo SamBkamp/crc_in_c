@@ -5,7 +5,7 @@
 
 #define BITS_PER_BYTE 8
 #define CRC_LEN 16
-#define generator 35767
+#define generator 1417
 
 
 //PRINTING/FORMATTING FUNCTIONS
@@ -29,9 +29,9 @@ void pr(char* t, size_t len){ //print string with binary representation
   }
 }
 
-void printCharAsBinary(int c, size_t size){ 
+void printCharAsBinary(unsigned long c, size_t size){ 
   for (int j = size-1; j >= 0; j--){    
-    printf("%c", (c & (1 << j)) ? '1' : '0');
+    printf("%c", (c & (1UL << j)) ? '1' : '0');
     if(j % 8 == 0)
       printf(" ");
   }
@@ -42,20 +42,20 @@ void printCharAsBinary(int c, size_t size){
 
 
 
-int* generateCRC(char* t){
-  int msb_mask = 1 << BITS_PER_BYTE-1;
-  int shift_reg_mask = 1 << CRC_LEN;
-  int* sRegister = malloc(CRC_LEN + 1);
-  int chars = strlen(t) + ((CRC_LEN)/8); //length of the message + CRC length
+unsigned long* generateCRC(char* t){
+  unsigned long msb_mask = 1 << BITS_PER_BYTE-1;
+  unsigned long shift_reg_mask = 1 << CRC_LEN;
+  unsigned long* sRegister = malloc(CRC_LEN + 1);
+  unsigned long chars = strlen(t) + ((CRC_LEN)/8); //length of the message + CRC length
   
   //SHIFTING INTO REGISTER
   for (int i = 0; i < chars; i++){
     for (int j = BITS_PER_BYTE-1; j >= 0; j--){
       *sRegister <<= 1; //shift register
-      int MSB = (t[i] & msb_mask ? 1 : 0); //get next bit in stream
+      unsigned long MSB = (t[i] & msb_mask ? 1 : 0); //get next bit in stream
       *sRegister |= MSB; //add next bit to register
       t[i] <<= 1; //shift stream to next bit
-      int a = (shift_reg_mask & *sRegister) >> CRC_LEN;  // wether or not MSB is 1
+      unsigned long a = (shift_reg_mask & *sRegister) >> CRC_LEN;  // wether or not MSB is 1
       *sRegister = *sRegister ^ (a ? generator : 0); //xor with the generator if MSB is 1, otherwise xor with 0 (do nothing)
     }
   }
@@ -74,13 +74,13 @@ int main(int argc, char* argv[]){
   printCharAsBinary(generator, CRC_LEN+1);
   
   pr(t, sizeof(t) - 1); //WARNING YOU SHOULD NOT SUBTRACT FROM A SIZE_T UNLESS U WANT SOMETHING TO BREAK LATER
-  int* crc = generateCRC(t);
+  unsigned long* crc = generateCRC(t);
   printCharAsBinary(*crc - (1 << 8), BITS_PER_BYTE);
 
   *crc &= UINT_MAX ^ (UINT_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
   
-  printf("generator: %d\n", generator);
-  printf("result: %d\n", *crc);
+  printf("generator: %lu\n", generator);
+  printf("result: %lu\n", *crc);
   printf("result in bin: ");
   printCharAsBinary(*crc, sizeof(int) * 8);
   
