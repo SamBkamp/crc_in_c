@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
   int* crc = generateCRC(t);
   printCharAsBinary(*crc - (1 << 8), BITS_PER_BYTE);
 
-  *crc &= UINT_MAX >> (UINT_MAX - (CRC_LEN-1)); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
+  *crc &= UINT_MAX ^ (UINT_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
   
   printf("generator: %d\n", generator);
   printf("result: %d\n", *crc);
