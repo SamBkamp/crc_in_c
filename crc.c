@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define CRC_LEN 16
-#define generator 1417
+#define CRC_LEN 32
+#define generator 2168537515
 
-
+z
 //PRINTING/FORMATTING FUNCTIONS
 void pr(char* t, size_t len){ //print string with binary representation
   size_t bufSize = CHAR_BIT+1;
@@ -31,7 +31,7 @@ void pr(char* t, size_t len){ //print string with binary representation
 void printCharAsBinary(unsigned long c, size_t size){ 
   for (int j = size-1; j >= 0; j--){    
     printf("%c", (c & (1UL << j)) ? '1' : '0');
-    if(j % 8 == 0)
+    if(j % CHAR_BIT == 0)
       printf(" ");
   }
   printf("\n");
@@ -43,9 +43,9 @@ void printCharAsBinary(unsigned long c, size_t size){
 
 unsigned long* generateCRC(char* t){
   unsigned long msb_mask = 1 << CHAR_BIT-1;
-  unsigned long shift_reg_mask = 1UL << (CRC_LEN < sizeof(unsigned long) * CHAR_BIT ? CRC_LEN : CRC_LEN-1); //last bit in the byte
+  unsigned long shift_reg_mask = 1UL << CRC_LEN;
   unsigned long* sRegister = malloc((CRC_LEN/CHAR_BIT) + 1);
-  unsigned long chars = strlen(t) + ((CRC_LEN)/8); //length of the message + CRC length
+  unsigned long chars = strlen(t) + ((CRC_LEN)/CHAR_BIT); //length of the message + CRC length
   
   //SHIFTING INTO REGISTER
   for (int i = 0; i < chars; i++){
@@ -63,23 +63,24 @@ unsigned long* generateCRC(char* t){
 
 int main(int argc, char* argv[]){
 
-  char t[3];
+  char t[6];
   t[0] = 0x41;
   t[1] = 0x41;
   t[2] = 0;
-  t[3] = 0; //MAKE SURE YOU HAVE AS MANY NULL TERMINATORS AS YOU HAVE BYTES IN THE CRC
-
-  printf("generator:");
-  printCharAsBinary(generator, CRC_LEN+1);
-  
+  t[3] = 0; //MAKE SURE YOU HAVE AT LEAST AS MANY NULL TERMINATORS AS YOU HAVE BYTES IN THE CRC
+  t[4] = 0;
+  t[5] = 0;
+    
   pr(t, sizeof(t) - 1); //WARNING YOU SHOULD NOT SUBTRACT FROM A SIZE_T UNLESS U WANT SOMETHING TO BREAK LATER
   unsigned long* crc = generateCRC(t);
-  printCharAsBinary(*crc - (1 << 8), CHAR_BIT);
 
   *crc &= ULONG_MAX ^ (ULONG_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
+  printf("\ngenerator: %lu\n", generator);
+  printf("generator in bin: ");
+  printCharAsBinary(generator, CRC_LEN);  
   
-  printf("generator: %lu\n", generator);
-  printf("result: %lu\n", *crc);
+  
+  printf("\nresult: %lu\n", *crc);
   printf("result in bin: ");
   printCharAsBinary(*crc, CRC_LEN);
   
