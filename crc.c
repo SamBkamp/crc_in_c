@@ -3,14 +3,13 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define BITS_PER_BYTE 8
 #define CRC_LEN 16
 #define generator 1417
 
 
 //PRINTING/FORMATTING FUNCTIONS
 void pr(char* t, size_t len){ //print string with binary representation
-  size_t bufSize = BITS_PER_BYTE+1;
+  size_t bufSize = CHAR_BIT+1;
   char spacing[bufSize];
   memset(spacing, ' ', bufSize);
   spacing[bufSize-1] = '\0'; //padding buffer init. 9 spaces, 8 for the bits + 1 for clarity
@@ -43,14 +42,14 @@ void printCharAsBinary(unsigned long c, size_t size){
 
 
 unsigned long* generateCRC(char* t){
-  unsigned long msb_mask = 1 << BITS_PER_BYTE-1;
+  unsigned long msb_mask = 1 << CHAR_BIT-1;
   unsigned long shift_reg_mask = 1 << CRC_LEN;
   unsigned long* sRegister = malloc(CRC_LEN + 1);
   unsigned long chars = strlen(t) + ((CRC_LEN)/8); //length of the message + CRC length
   
   //SHIFTING INTO REGISTER
   for (int i = 0; i < chars; i++){
-    for (int j = BITS_PER_BYTE-1; j >= 0; j--){
+    for (int j = CHAR_BIT-1; j >= 0; j--){
       *sRegister <<= 1; //shift register
       unsigned long MSB = (t[i] & msb_mask ? 1 : 0); //get next bit in stream
       *sRegister |= MSB; //add next bit to register
@@ -75,7 +74,7 @@ int main(int argc, char* argv[]){
   
   pr(t, sizeof(t) - 1); //WARNING YOU SHOULD NOT SUBTRACT FROM A SIZE_T UNLESS U WANT SOMETHING TO BREAK LATER
   unsigned long* crc = generateCRC(t);
-  printCharAsBinary(*crc - (1 << 8), BITS_PER_BYTE);
+  printCharAsBinary(*crc - (1 << 8), CHAR_BIT);
 
   *crc &= UINT_MAX ^ (UINT_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
   
