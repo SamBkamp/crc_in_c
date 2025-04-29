@@ -43,8 +43,8 @@ void printCharAsBinary(unsigned long c, size_t size){
 
 unsigned long* generateCRC(char* t){
   unsigned long msb_mask = 1 << CHAR_BIT-1;
-  unsigned long shift_reg_mask = 1 << CRC_LEN;
-  unsigned long* sRegister = malloc(CRC_LEN + 1);
+  unsigned long shift_reg_mask = 1UL << (CRC_LEN < sizeof(unsigned long) * CHAR_BIT ? CRC_LEN : CRC_LEN-1); //last bit in the byte
+  unsigned long* sRegister = malloc((CRC_LEN/CHAR_BIT) + 1);
   unsigned long chars = strlen(t) + ((CRC_LEN)/8); //length of the message + CRC length
   
   //SHIFTING INTO REGISTER
@@ -76,12 +76,12 @@ int main(int argc, char* argv[]){
   unsigned long* crc = generateCRC(t);
   printCharAsBinary(*crc - (1 << 8), CHAR_BIT);
 
-  *crc &= UINT_MAX ^ (UINT_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
+  *crc &= ULONG_MAX ^ (ULONG_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
   
   printf("generator: %lu\n", generator);
   printf("result: %lu\n", *crc);
   printf("result in bin: ");
-  printCharAsBinary(*crc, sizeof(int) * 8);
+  printCharAsBinary(*crc, CRC_LEN);
   
   free(crc);
   return 0;
