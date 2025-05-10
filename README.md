@@ -33,15 +33,21 @@ after this, the register would be xor'd with either ``generator`` or ``0`` depen
 ## How do I use this program?
 edit the 3 definitions to your liking:
 ```c
-#define INT_SIZE 8
-#define SHIFT_REG_LEN 9
-#define generator 263
+#define CRC_LEN 8
+#define GENERATOR 0x31
+#define INIT_VAL 0x00
+#define XOR_OUT 0x00
+#define REF 1
 ```
-`INT_SIZE` = the size of your integers in bits
+`CRC_LEN` = the length of your crc, in bits
 
-`SHIFT_REG_LEN` = the size of your shift register (which is the size of your CRC + 1)
+`GENERATOR` = the generator polynomial (expressed as an integer in c, so decimal or hex)
 
-`generator` = the generator polynomial (expressed as an integer in c, so decimal or hex)
+`INIT_VAL` = the initial value (0 if your version doesn't use one)
+
+`XOR_OUT` = the value of your xor out (also 0 if your version of crc doesn't use one)
+
+`REF` = 1 if your version uses reflected crc, 0 if it doesn't *(this is not fully implemented yet, REF = 1 will give you wrong results)*
 
 finally, change your message in the main function 
 ```c
