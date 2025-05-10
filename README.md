@@ -50,3 +50,6 @@ char t [2] = "W";
 
 ## Compilation?
 its a 60 line c file just throw it into gcc 
+
+
+# THIS PROGRAM DOES NOT **YET** FULLY IMPLEMENT REFLECTED CRC
