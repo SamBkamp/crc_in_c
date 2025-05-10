@@ -52,4 +52,4 @@ char t [2] = "W";
 its a 60 line c file just throw it into gcc 
 
 
-### THIS PROGRAM DOES NOT **YET** FULLY IMPLEMENT REFLECTED CRC
+### THIS PROGRAM DOES NOT *YET* FULLY IMPLEMENT REFLECTED CRC
