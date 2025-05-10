@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define CRC_LEN 32
-#define GENERATOR 0x04C11DB7
-#define INIT_VAL 0xFFFFFFFF
-#define XOR_OUT 0xFFFFFFFF
+#define CRC_LEN 8
+#define GENERATOR 0x31
+#define INIT_VAL 0x00
+#define XOR_OUT 0x00
+#define REF 1
 
 
 
@@ -29,6 +30,7 @@ void pr(char* t, size_t len){ //print string with binary representation
     }
     printf(" ");
   }
+    printf("\n");
 }
 
 void printCharAsBinary(unsigned long c, size_t size){ 
@@ -42,9 +44,29 @@ void printCharAsBinary(unsigned long c, size_t size){
 
 //--------------------------
 
+/*
+  reflectInt8 takes an 8-bit int (char) and reflects it
+  
+ */
+unsigned int reflectInt8(unsigned char d){
+  unsigned char r = 0;
+  unsigned char MSB_MASK = 1U << sizeof(unsigned char) * CHAR_BIT - 1;    
+  for (int i = 0; i < sizeof(unsigned char) * CHAR_BIT; i++){
+      r = MSB_MASK&d ? (r >> 1) ^ MSB_MASK : r >> 1;
+      d <<= 1;
+  } 
+  return r;
+}
 
 
 unsigned long* generateCRC(char* t){
+  if(REF){ //REFLECT THE INPUT BITS
+    char l[strlen(t)];
+    for (int i = 0; i < strlen(t); i++){
+      l[strlen(t)-i-1] = reflectInt8(t[i]);
+    }
+    memcpy(t, l, strlen(t));
+  };
   unsigned long msb_mask = 1 << CHAR_BIT-1;
   unsigned long shift_reg_mask = 1UL << CRC_LEN;
   unsigned long* sRegister = malloc((CRC_LEN/CHAR_BIT) + 1);
@@ -62,6 +84,7 @@ unsigned long* generateCRC(char* t){
 	*sRegister ^= INIT_VAL;
       unsigned long a = (shift_reg_mask & *sRegister) >> CRC_LEN;  // wether or not MSB is 1
       *sRegister = *sRegister ^ (a ? GENERATOR : 0); //xor with the GENERATOR if MSB is 1, otherwise xor with 0 (do nothing)
+
     }
   }
   *sRegister = *sRegister ^ XOR_OUT; //xor out
@@ -70,21 +93,22 @@ unsigned long* generateCRC(char* t){
 
 int main(int argc, char* argv[]){
 
-  char t[6];
+  char t[3];
   memset(t, 0, sizeof(t));
   t[0] = 0x41;
   t[1]  = 0x42;
-    
+
+  //printCharAsBinary(reflectInt8(0x41), sizeof(unsigned char) * 8);
+       
   pr(t, sizeof(t)); //WARNING YOU SHOULD NOT SUBTRACT FROM A SIZE_T UNLESS U WANT SOMETHING TO BREAK LATER
   unsigned long* crc = generateCRC(t);
 
   *crc &= ULONG_MAX ^ (ULONG_MAX << CRC_LEN); //mask away any unused bits that are still technically part of the int (bc we're only using a small part of the int)
-  printf("\ngenerator: %lx\n", GENERATOR);
+  printf("\ngenerator: 0x%lx\n", GENERATOR);
   printf("generator in bin: ");
   printCharAsBinary(GENERATOR, CRC_LEN);  
-  
-  
-  printf("\nresult: %lx\n", *crc);
+    
+  printf("\nresult: 0x%lx\n", *crc);
   printf("result in bin: ");
   printCharAsBinary(*crc, CRC_LEN);
   
